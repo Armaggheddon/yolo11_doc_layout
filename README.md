@@ -1,108 +1,131 @@
-# YoloV11 Document Layout Analysis
+<div id="top"></div>
+<br/>
+<br/>
+<br/>
 
-![Logo](plots/logo.png)
 
-Welcome to the YoloV11 Document Layout project! This project delves into the fascinating world of document layout analysis using the power of YOLOv11. The goal is to train and evaluate different YOLO models to accurately detect various elements within a document, such as text blocks, tables, and figures.
+<p align="center">
+  <img src="plots/logo.png" alt="yolo11n sample outputs">
+</p>
+<h1 align="center">
+    <a href="https://github.com/Armaggheddon/yolo11_doc_layout">Yolo11 Document Layout 🔎📄</a>
+</h1>
 
-In this project, three different models have been trained and fine-tuned, which are named `train4`, `train5`, and `train6`. The performance of these models has been thoroughly analyzed to determine the optimal configuration.
+<div align="center">
 
-## Models on the Spotlight
+<p align="center">
+  <a href="https://huggingface.co/Armaggheddon/yolo11-document-layout">
+    <img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Models%20&%20Results-blue" alt="Hugging Face Models">
+  </a>
+  <a href="https://huggingface.co/spaces/Armaggheddon/yolo11-document-layout">
+    <img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue" alt="Hugging Face Spaces">
+  </a>
+  <a href="https://github.com/Armaggheddon/yolo11_doc_layout/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License">
+  </a>
+</p>
 
-The study experimented with three core model configurations from the training runs:
+</div>
 
-*   **`train4`**: The lightweight champion, the YOLOv11n (nano) model.
-*   **`train5`**: A YOLOv11s (small) model, representing a step up in size.
-*   **`train6`**: The powerhouse, a YOLOv11m (medium) model.
 
-The document below details how the models stack up against each other.
+This repository contains **high-performance YOLOv11 models** for Document Layout Analysis, fine-tuned on the [DocLayNet dataset](https://huggingface.co/datasets/ds4sd/DocLayNet). The models are designed to accurately detect 11 common document structures like titles, tables, text, and figures right out of the box.
 
-### Training and Evaluation at a Glance
+The primary goal of this repository is to showcase the models' capabilities and provide a simple way to use them. For a deep dive into the training methodology and performance metrics, please see the **[Hugging Face Model Card](https://huggingface.co/Armaggheddon/yolo11-document-layout)**.
 
-Before comparing the models directly, it is beneficial to analyze their individual training journeys. The plots below illustrate the core metrics (such as precision, recall, and mAP) as the models learned over time. The confusion matrix for each model provides a visual breakdown of how effectively it learned to distinguish between the different document layout elements. A perfect model would display a bright diagonal line from top-left to bottom-right, indicating minimal confusion between classes.
+## 🚀 Get Started: Inference in Seconds
 
-#### `train4` (YOLOv11n)
+You can easily use the pre-trained models hosted on the Hugging Face Hub for your own document analysis tasks. Or try out the models directly in your browser using the [Hugging Face Space](https://huggingface.co/spaces/Armaggheddon/yolo11-document-layout).
 
-| Training Metrics | Normalized Confusion Matrix |
-| :--- | :--- |
-| <img src="runs/train4/results.png" alt="train4 results" height="200"> | <img src="runs/train4/confusion_matrix_normalized.png" alt="train4 confusion matrix" height="200"> |
+### 1. Installation
 
-#### `train5` (YOLOv11s)
+Clone this repository and install the required dependencies.
 
-| Training Metrics | Normalized Confusion Matrix |
-| :--- | :--- |
-| <img src="runs/train5/results.png" alt="train5 results" height="200"> | <img src="runs/train5/confusion_matrix_normalized.png" alt="train5 confusion matrix" height="200"> |
+```bash
+git clone https://github.com/Armaggheddon/yolo11_doc_layout.git
+cd yolo11_doc_layout
+pip install -r requirements.txt
+```
 
-#### `train6` (YOLOv11m)
+### 2. Run Inference
+The following script downloads the recommended YOLOv11-Nano model and runs inference on a local image. You can easily switch to the small or medium models by changing the index in the `model_files` array.
 
-| Training Metrics | Normalized Confusion Matrix |
-| :---| :--- |
-| <img src="runs/train6/results.png" alt="train6 results" height="200"> | <img src="runs/train6/confusion_matrix_normalized.png" alt="train6 confusion matrix" height="200"> |
+```python
+from pathlib import Path
+from huggingface_hub import hf_hub_download
+from ultralytics import YOLO
 
-#### `train9` (YOLOv11n)
+# Define the local directory to save models
+DOWNLOAD_PATH = Path("./models")
+DOWNLOAD_PATH.mkdir(exist_ok=True)
 
-| Training Metrics | Normalized Confusion Matrix |
-| :--- | :--- |
-| <img src="runs/train9/results.png" alt="train9 results" height="200"> | <img src="runs/train9/confusion_matrix_normalized.png" alt="train9 confusion matrix" height="200"> |
+# Choose which model to use
+# 0: nano, 1: small, 2: medium
+model_files = [
+    "yolo11n_doc_layout.pt",
+    "yolo11s_doc_layout.pt",
+    "yolo11m_doc_layout.pt",
+]
+selected_model_file = model_files[0] # Using the recommended nano model
 
-These metrics establish a solid baseline for understanding each model's strengths and weaknesses prior to direct comparisons.
+# Download the model from the Hugging Face Hub
+model_path = hf_hub_download(
+    repo_id="Armaggheddon/yolo11-document-layout",
+    filename=selected_model_file,
+    repo_type="model",
+    local_dir=DOWNLOAD_PATH,
+)
 
-## Results and Showdown
+# Initialize the YOLO model
+model = YOLO(model_path)
 
-Following training and evaluation, the results have been gathered and visualized using a variety of metrics.
+# Run inference on an image
+# Replace 'path/to/your/document.jpg' with your file
+results = model('path/to/your/document.jpg')
 
-### Nano vs. Small vs. Medium
+# Save the results
+results[0].save(filename="result.jpg")
+```
 
-Here is a quick look at how the three primary models compare in terms of key metrics per document layout label.
+## ✨ The Models: Nano, Small, and Medium
+Three model variants are available, allowing you to choose the perfect balance between speed and accuracy for your needs.
 
-| **mAP@50-95** | **mAP@50** |
+| Model Filename | Size |Recommended Use Case |
+| :---: | :---: | :--- |
+| yolo11n_doc_layout.pt (*train4*)| Nano | **(Recommended)** Best for real-time applications and environments with limited resources. Offers an excellent balance of speed and high-quality detections. |
+| yolo11s_doc_layout.pt (*train5*)| Small | A great mid-point, providing a boost in accuracy over the nano model with a moderate increase in computational cost. |
+| yolo11m_doc_layout.pt (*train6*)| Medium | The highest accuracy model, suitable for offline processing or when maximum precision is the top priority. |
+
+## 📊 Performance Highlights
+As expected, larger models achieve higher raw accuracy, but the nano (`train4`) and small (`train5`) models provide most of the performance at a fraction of the cost. The **nano model stands out for** its exceptional efficiency and high-quality localization.
+
+| mAP@50-95 (Strict IoU) | Precision (Box Quality) |
 | :---: | :---: |
-| <img src="plots/n_s_m_comparison/map50_95_per_label.png" alt="mAP@50-95" height="200"> | <img src="plots/n_s_m_comparison/map50_per_label.png" alt="mAP@50" height="200"> |
+| <img src="plots/n_s_m_comparison/map50_95_per_label.png" alt="mAP@50-95" width="400"> | <img src="plots/n_s_m_comparison/box_precision_per_label.png" alt="Precision" width="400"> |
 
-| **Precision** | **Recall** |
-| :---: | :---: |
-| <img src="plots/n_s_m_comparison/box_precision_per_label.png" alt="Precision" height="200"> | <img src="plots/n_s_m_comparison/recall_per_label.png" alt="Recall" height="200"> |
+> ➡️ For a full analysis and comparison, see the [Hugging Face Model Card](https://huggingface.co/Armaggheddon/yolo11-document-layout).
 
-As shown, the larger models (`train5` and `train6`) generally exhibit better performance across the board, which is expected given their increased complexity. However, the nano model, `train4`, offers notable efficiency benefits when considering its speed and resource footprint.
 
-### Why `train4` (YOLOv11n) is the Best, All Things Considered
+## 📚 About the Dataset
+The models were trained on the [DocLayNet dataset](https://huggingface.co/datasets/ds4sd/DocLayNet), a large and diverse collection of documents annotated with 11 layout categories:
+- `Caption`, `Footnote`, `Formula`, `List-item`, `Page-footer`, `Page-header`, `Picture`, `Section-header`, `Table`, `Text`, `Title`
 
-When deploying models in real-world scenarios, performance is not solely defined by accuracy; it must be balanced with speed and resource consumption. This is where the `train4` (YOLOv11n) model truly excels.
+The original dataset is in COCO format and was converted to the required YOLO format using the [`doclaynet2yolo.py`](doclaynet2yolo.py) script included in this repository. All models were trained at a 1280x1280 resolution to ensure high performance on documents with small text elements like `footnotes` and `captions`.
+<img src="plots/class_distribution.jpg" alt="Dataset Samples" width="400"/>
 
-While `train5` and `train6` may achieve higher overall scores, `train4` provides an excellent balance of performance and efficiency. The percentage improvement plots illustrate the performance gains realized by moving to larger models.
+## 📂 Training Runs and Validation
 
-| **mAP@50-95 % Improv.** | **mAP@50 % Improv. |
-|:---: | :---: |
-| <img src="plots/n_s_m_comparison/map50_95_percentage_improvement_per_label.png" alt="mAP@50-95 % Improv." height="200"> | <img src="plots/n_s_m_comparison/map50_percentage_improvement_per_label.png" alt="mAP@50 % Improv." height="200"> |
+The `runs` directory contains all the artifacts generated during the training of the nano, small, and medium models. This includes training metrics, configuration files, and sample batches, providing full transparency into the training process.
 
-| **Precision % Improv.** | **Recall % Improv. |
-| :---: | :---: |
-| <img src="plots/n_s_m_comparison/box_precision_percentage_improvement_per_label.png" alt="Precision % Improv." height="200"> | <img src="plots/n_s_m_comparison/recall_percentage_improvement_per_label.png" alt="Recall % Improv." height="200"> |
+Each sub-directory (e.g., `runs/train4`) corresponds to a specific training run and contains:
+- **`args.yaml`**: The complete set of training arguments and hyperparameters used.
+- **Plots**: Visualizations of performance metrics like mAP, precision, and recall curves (e.g., `results.png`, `BoxP_curve.png`).
+- **Sample Batches**:
+    - `train_batch*.jpg`: Images from the training set with ground truth labels.
+    - `val_batch*_labels.jpg`: Validation images with ground truth labels.
+    - `val_batch*_pred.jpg`: Model predictions on the same validation images, allowing for a direct comparison.
 
-From these plots, the performance gains are noticeable, but the nano model (`train4`) holds its ground remarkably well, especially for certain labels. For applications where speed is critical and computational resources are limited, `train4` offers a lightweight solution with very respectable accuracy.
 
-### The `train4` vs. `train9` Showdown: A Lesson in Quality Over Quantity
+The validation results of each training run are also available in the respective `valX` folder.
 
-While the initial comparison focused on models of different sizes, a deeper analysis was conducted between two nano models: `train4` (Iter 4) and a subsequent iteration, `train9` (Iter 9). Although both models converged to nearly identical overall mAP scores and `train9` displayed a smoother training curve, **`train4` ultimately proved to be the more reliable choice for production due to superior localization accuracy.**
-
-`train9`’s training progression prioritized **detection coverage (Recall)**, resulting in a model that is less reliable in accurately defining object boundaries compared to `train4`. This lack of precision makes `train9` suboptimal for tasks requiring high data integrity.
-
-The justification for selecting `train4` is rooted in its substantial gains in key quality metrics:
-
-*   **Superior Box Precision:** `train4` delivered highly accurate bounding boxes, evidenced by an improvement of over **9.0%** in Box Precision for the `title` category, and similar strong gains in `section-header` and `table`. This indicates that `train9` lagged significantly in object localization.
-*   **Maximized mAP Quality:** `train4` achieved a 2.4% improvement in mAP50 and a 2.05% improvement in mAP50_95 for the challenging `footnote` element. This demonstrates `train4`'s superior capability in reaching high Intersection over Union (IOU) quality thresholds, which `train9` missed.
-
-In essence, **`train9` traded bounding box quality for detection quantity.** If the goal is a robust production model that outputs accurately located data, the high localization precision of **`train4`** makes it the more optimal and reliable choice.
-
-Here are some more detailed plots specifically for the best-performing nano model, `train4`.
-
-| **mAP@50-95** | **mAP@50** |
-| :---: | :---: |
-| <img src="plots/yolo11n_best/map50_95_per_label.png" alt="mAP@50-95" height="200"> | <img src="plots/yolo11n_best/map50_per_label.png" alt="mAP@50" height="200"> |
-
-| **Precision** | **Recall** |
-| :---: | :---: |
-| <img src="plots/yolo11n_best/box_precision_per_label.png" alt="Precision" height="200"> | <img src="plots/yolo11n_best/recall_per_label.png" alt="Recall" height="200"> |
-
-## Conclusion
-
-This project successfully demonstrates the capabilities of YOLOv11 for document layout analysis. The study has shown that while larger models provide higher raw accuracy, the YOLOv11n model (`train4`) is a strong contender, offering an excellent compromise between performance and efficiency. The analysis of `train4` versus `train9` underscores the importance of prioritizing localization accuracy (precision) over sheer detection coverage (recall) when deploying models for critical data extraction tasks.
+## 📄 License
+This project is licensed under the MIT License. See the [LICENSE]() file for details.

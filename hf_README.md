@@ -1,170 +1,163 @@
-# YOLOv11 Document Layout
+---
+license: mit
+datasets:
+- ds4sd/DocLayNet
+language:
+- en
+library_name: ultralytics
+base_model:
+- Ultralytics/YOLO11
+pipeline_tag: object-detection
+tags:
+- object-detection
+- document-layout
+- yolov11
+- ultralytics
+- document-layout-analysis
+- document-ai
+---
 
-![Logo](plots/logo.png)
+# YOLOv11 for Advanced Document Layout Analysis
 
-This page documents a comprehensive study on Document Layout Analysis using the YOLOv11 model family with the ultralytics library. The primary objective of this project is the training and evaluation of highly optimized YOLO models capable of accurately detecting various elements within documents, such as text blocks, tables, and figures. The models have been finetuned on the DocLayNet dataset that provides a rich variety of annotated document layouts.
+<p align="center">
+  <img src="plots/logo.png" alt="Logo" width="100%"/>
+</p>
 
-The project involved fine-tuning three version of the YOLOv11 family, the `n` (nano), `s` (small), and `m` (medium) models.
+This repository hosts three YOLOv11 models (**nano, small, and medium**) fine-tuned for high-performance **Document Layout Analysis** on the challenging [DocLayNet dataset](https://huggingface.co/datasets/ds4sd/DocLayNet).
 
-The final, recommended model, **yolo11n_doc_layout.pt (train4)**, offers the best balance of speed and localization quality.
+The goal is to accurately detect and classify key layout elements in a document, such as text, tables, figures, and titles. This is a fundamental task for document understanding and information extraction pipelines.
 
+### ✨ Model Highlights
+*   **🚀 Three Powerful Variants:** Choose between `nano`, `small`, and `medium` models to fit your performance needs.
+*   **🎯 High Accuracy:** Trained on the comprehensive DocLayNet dataset to recognize 11 distinct layout types.
+*   ⚡ **Optimized for Efficiency:** The recommended **`yolo11n` (nano) model** offers an exceptional balance of speed and accuracy, making it ideal for production environments.
 
+---
 
-## 🚀 How to use 
+## 🚀 Get Started
 
-### Installation
+Get up and running with just a few lines of code.
 
-To run the model locally, ensure the necessary libraries are installed:
+### 1. Installation
+
+First, install the necessary libraries.
 
 ```bash
-pip install -r requirements.txt
+pip install ultralytics huggingface_hub
 ```
 
-### Inference Example
+### 2. Inference Example
 
-This Python snippet demonstrates how to load and run inference on the document layout analysis model:
+This Python snippet shows how to download a model from the Hub and run inference on a local document image.
 
 ```python
 from pathlib import Path
 from huggingface_hub import hf_hub_download
 from ultralytics import YOLO
 
-DOWNLOAD_PATH = Path(__file__).parent / "models"
+# Define the local directory to save models
+DOWNLOAD_PATH = Path("./models")
+DOWNLOAD_PATH.mkdir(exist_ok=True)
 
-available_models = [
+# Choose which model to use
+# 0: nano, 1: small, 2: medium
+model_files = [
     "yolo11n_doc_layout.pt",
     "yolo11s_doc_layout.pt",
     "yolo11m_doc_layout.pt",
 ]
+selected_model_file = model_files[0] # Using the recommended nano model
 
+# Download the model from the Hugging Face Hub
 model_path = hf_hub_download(
     repo_id="Armaggheddon/yolo11-document-layout",
-    filename=available_models[0],  # Change index for different models
+    filename=selected_model_file,
     repo_type="model",
     local_dir=DOWNLOAD_PATH,
 )
 
-# Initialize the model from the downloaded path
+# Initialize the YOLO model
 model = YOLO(model_path)
 
-# Load an image (replace 'path/to/your/document.jpg' with your file)
+# Run inference on an image
+# Replace 'path/to/your/document.jpg' with your file
 results = model('path/to/your/document.jpg')
 
 # Process and display results
-results.print()
-results.show()
+results[0].print()  # Print detection details
+results[0].show()   # Display the image with bounding boxes
 ```
 
-
-## Dataset Overview: DocLayNet
-The models were trained on the [DocLayNet dataset](https://huggingface.co/datasets/ds4sd/DocLayNet), which contains a diverse collection of document images annotated with various layout elements. The dataset includes the following key labels:
-- **Text:** Regular paragraphs.
-- **Picture:** A graphic or photograph.
-- **Caption:** Special text outside a picture or table that introduces this picture or table.
-- **Section-header:** Any kind of heading in the text, except overall document title.
-- **Footnote:** Typically small text at the bottom of a page, with a number or symbol that is referred to in the text above.
-- **Formula:** Mathematical equation on its own line.
-- **Table:** Material arranged in a grid alignment with rows and columns, often with separator lines.
-- **List-item:** One element of a list, in a hanging shape, i.e., from the second line onwards the paragraph is indented more than the first line.
-- **Page-header:** Repeating elements like page number at the top, outside of the normal text flow.
-- **Page-footer:** Repeating elements like page number at the bottom, outside of the normal text flow.
-* **Title:** Overall title of a document, (almost) exclusively on the first page and typically appearing in large font.
-
-All the images of the dataset are 1250x1250 pixels and therefore the training resolution was set to 1280x1280. This is also driven by initial evaluations showing that using the default 640x640 resolution led to a significant drop in performance, especially for smaller elements like `footnote` and `caption`.
-
-More information about the dataset and how it has been created can be found in the [DocLayNet Labeling Guide](https://raw.githubusercontent.com/DS4SD/DocLayNet/main/assets/DocLayNet_Labeling_Guide_Public.pdf).
-
-The dataset labels were mapped to the YOLO format through `doclaynet_to_yolo.py`, ensuring compatibility with the YOLO training pipeline.
-The dataset class distribution is visualized in the image below.
-
-![Class Distribution](plots/class_distribution.jpg)
 ---
 
-## The Contenders: Models on the Spotlight
+## 📊 Model Performance & Evaluation
 
-The study experimented with three core model configurations, varying primarily by size:
+We fine-tuned three YOLOv11 variants, allowing you to choose the best model for your use case.
 
-- **YOLOv11n (train4)**
-- **YOLOv11s (train5)**
-- **YOLOv11m (train6)**
+*   **`yolo11n_doc_layout.pt` (train4)**: **Recommended.** The nano model offers the best trade-off between speed and accuracy.
+*   **`yolo11s_doc_layout.pt` (train5)**: A larger, slightly more accurate model.
+*   **`yolo11m_doc_layout.pt` (train6)**: The largest model, providing the highest accuracy with a corresponding increase in computational cost.
 
-In reality, the performance gains stepping up the model sizes are marginal especially when considering the increased resource demands. This is notable evident in the improvements from the `s` to `m` model size increase. With all the results considered, the `n` model family (nano) is the most efficient and effective choice for deployment providing a good balance of speed and accuracy.
+As shown in the analysis below, performance gains are marginal when moving from the `small` to the `medium` model, making the `nano` and `small` variants the most practical choices.
 
-### Training and Evaluation at a Glance
+### Nano vs. Small vs. Medium Comparison
 
-The plots below illustrate the core convergence metrics (precision, recall, and mAP) as the models learned over time. The normalized confusion matrices provide a visual breakdown of how accurately the models distinguish between different document layout elements—a strong diagonal line indicates robust classification.
+Here's how the three models stack up across key metrics. The plots compare their performance for each document layout label.
+
+| **mAP@50-95** (Strict IoU) | **mAP@50** (Standard IoU) |
+| :---: | :---: |
+| <img src="plots/n_s_m_comparison/map50_95_per_label.png" alt="mAP@50-95" width="400"> | <img src="plots/n_s_m_comparison/map50_per_label.png" alt="mAP@50" width="400"> |
+
+| **Precision** (Box Quality) | **Recall** (Detection Coverage) |
+| :---: | :---: |
+| <img src="plots/n_s_m_comparison/box_precision_per_label.png" alt="Precision" width="400"> | <img src="plots/n_s_m_comparison/recall_per_label.png" alt="Recall" width="400"> |
+
+<details>
+<summary><b>Click to see detailed Training Metrics & Confusion Matrices</b></summary>
 
 | Model | Training Metrics | Normalized Confusion Matrix |
 | :---: | :---: | :---: |
-| **`train4`** | <img src="runs/train4/results.png" alt="train4 results" height="200"> | <img src="runs/train4/confusion_matrix_normalized.png" alt="train4 confusion matrix" height="200"> |
-| **`train5`** | <img src="runs/train5/results.png" alt="train5 results" height="200"> | <img src="runs/train5/confusion_matrix_normalized.png" alt="train5 confusion matrix" height="200"> |
-| **`train6`** | <img src="runs/train6/results.png" alt="train6 results" height="200"> | <img src="runs/train6/confusion_matrix_normalized.png" alt="train6 confusion matrix" height="200"> |
-| **`train9`** | <img src="runs/train9/results.png" alt="train9 results" height="200"> | <img src="runs/train9/confusion_matrix_normalized.png" alt="train9 confusion matrix" height="200"> |
+| **`yolo11n`** (train4) | <img src="runs/train4/results.png" alt="train4 results" height="200"> | <img src="runs/train4/confusion_matrix_normalized.png" alt="train4 confusion matrix" height="200"> |
+| **`yolo11s`** (train5) | <img src="runs/train5/results.png" alt="train5 results" height="200"> | <img src="runs/train5/confusion_matrix_normalized.png" alt="train5 confusion matrix" height="200"> |
+| **`yolo11m`** (train6) | <img src="runs/train6/results.png" alt="train6 results" height="200"> | <img src="runs/train6/confusion_matrix_normalized.png" alt="train6 confusion matrix" height="200"> |
 
+</details>
 
-## Results and Performance Showdown
+### 🏆 The Champion: Why `train4` (Nano) is the Best Choice
 
-### Nano vs. Small vs. Medium Size Comparison
+While all nano-family models performed well, a deeper analysis revealed that **`train4`** stands out for its superior **localization quality**.
 
-The plots below compare the performance of the three main models across key metrics for each document layout label.
+We compared it against `train9` (another strong nano contender), which achieved a slightly higher recall by sacrificing bounding box precision. For applications where data integrity and accurate object boundaries are critical, `train4` is the clear winner.
 
-| **mAP@50-95** (Strict Accuracy) | **mAP@50** (Standard Accuracy) |
-| :---: | :---: |
-| <img src="plots/n_s_m_comparison/map50_95_per_label.png" alt="mAP@50-95" height="200"> | <img src="plots/n_s_m_comparison/map50_per_label.png" alt="mAP@50" height="200"> |
-
-| **Precision** (Box Quality) | **Recall** (Detection Coverage) |
-| :---: | :---: |
-| <img src="plots/n_s_m_comparison/box_precision_per_label.png" alt="Precision" height="200"> | <img src="plots/n_s_m_comparison/recall_per_label.png" alt="Recall" height="200"> |
-
-As anticipated, the larger models (`train5` and `train6`) generally exhibit superior raw performance due to increased complexity. However, the `train4` nano model provides significant efficiency, making the detailed analysis of the nano family essential.
-
-### 🔬 In-Depth Analysis: The Nano Model Family Performance (`YOLOv11n`)
-
-The nano models (`yolo11n`) are the most suitable candidates for real-world deployment due to their minimal resource consumption. This deeper analysis was conducted to find the optimal balance of speed and accuracy within this efficient family.
-
-| **mAP@50-95** (Strict Accuracy) | **mAP@50** (Standard Accuracy) |
-| :---: | :---: |
-| <img src="plots/yolo11n_scores/map50_95_per_label.png" alt="mAP@50-95" height="200"> | <img src="plots/yolo11n_scores/map50_per_label.png" alt="mAP@50" height="200"> |
-
-| **Precision** (Box Quality) | **Recall** (Detection Coverage) |
-| :---: | :---: |
-| <img src="plots/yolo11n_scores/box_precision_per_label.png" alt="Precision" height="200"> | <img src="plots/yolo11n_scores/recall_per_label.png" alt="Recall" height="200"> |
-
-#### Justification for `train4` and `train9` Selection
-
-The iterations **`train4` (yolo11n.4)** and **`train9` (yolo11n.9)** were selected for direct comparison because they represent two distinct, near-peak optimization strategies within the nano family:
-
-*   **`train9` (Highest Average Performer):** This iteration consistently exhibits the highest or near-highest scores across general categories, particularly in mAP50 and Recall (pink line). It represents the model that achieved the highest overall score based on simple optimization criteria.
-*   **`train4` (Localization Integrity Champion):** This iteration (red line) shows exceptional strength in specific, critical areas relating to bounding box quality. It directly competes with `train9` in Box Precision across several labels (e.g., `section-header`, `table`), suggesting a superior focus on accurate localization.
-
----
-
-### The `train4` vs. `train9` Showdown: Quality Over Quantity
-
-Although both nano models converged to nearly identical overall mAP scores and `train9` displayed a smoother training curve, **`train4` ultimately proved to be the more optimal choice for production** due to its focus on localization accuracy.
-
-The `train9` model's optimization path prioritized **detection coverage (Recall)**, which often sacrifices high-quality object boundaries, making it less reliable for tasks requiring data integrity.
-
-The justification for selecting `train4` is rooted in its substantial gains in key quality metrics:
-
-1.  **Superior Box Precision:** `train4` delivered highly accurate bounding boxes, evidenced by an improvement of over **9.0%** in Box Precision for the `title` category, and strong gains in `section-header` and `table`.
-2.  **Maximized mAP Quality:** `train4` achieved a 2.4% improvement in mAP50 and a 2.05% improvement in mAP50_95 for the challenging `footnote` element. This demonstrates `train4`'s superior capability in reaching high Intersection over Union (IOU) quality thresholds.
+**Key Advantages of `train4`:**
+1.  **Superior Box Precision:** It delivered significantly more accurate bounding boxes, with a **+9.0%** precision improvement for the `title` class and strong gains for `section-header` and `table`.
+2.  **Higher Quality Detections:** It achieved a **+2.4%** mAP50 and **+2.05%** mAP50-95 improvement for the difficult `footnote` class, proving its ability to meet stricter IoU thresholds.
 
 | Box Precision Improvement | mAP50 Improvement | mAP50-95 Improvement |
 | :---: | :---: | :---: |
 | <img src="plots/yolo11n_best/box_precision_percentage_improvement_per_label.png" alt="Box Precision Improvement"> | <img src="plots/yolo11n_best/map50_percentage_improvement_per_label.png" alt="mAP50 Improvement"> | <img src="plots/yolo11n_best/map50_95_percentage_improvement_per_label.png" alt="mAP50-95 Improvement"> |
 
-In essence, **`train9` traded bounding box quality for detection quantity.** For a robust production model that outputs accurately located data, the high localization precision of **`train4`** makes it the unequivocally optimal and reliable choice.
+In short, `train4` prioritizes **quality over quantity**, making it the most reliable and optimal choice for production systems.
 
 ---
 
-## Summary
+## 📚 About the Dataset: DocLayNet
 
-This project successfully demonstrates the advanced capabilities of YOLOv11 for document layout analysis. While larger models offer higher raw accuracy, the YOLOv11n model (`train4`) stands out, providing an excellent compromise between performance and efficiency. The detailed analysis underscores the critical importance of prioritizing **localization accuracy (precision)** over sheer detection coverage (recall) when deploying models for mission-critical data extraction tasks.
+The models were trained on the [DocLayNet dataset](https://huggingface.co/datasets/ds4sd/DocLayNet), which provides a rich and diverse collection of document images annotated with 11 layout categories:
+
+*   **Text**, **Title**, **Section-header**
+*   **Table**, **Picture**, **Caption**
+*   **List-item**, **Formula**
+*   **Page-header**, **Page-footer**, **Footnote**
+
+**Training Resolution:** All models were trained at **1280x1280** resolution. Initial tests at the default 640x640 resulted in a significant performance drop, especially for smaller elements like `footnote` and `caption`.
+
+<img src="plots/class_distribution.jpg" alt="DocLayNet Samples" width="500px"/>
 
 ---
 
-## More details, code, and examples
-For full training scripts, dataset conversion utilities, and end-to-end examples, see the GitHub repository:
+## 💻 Code & Training Details
 
-https://github.com/Armaggheddon/yolo11_doc_layout
+This model card focuses on results and usage. For the complete end-to-end pipeline, including training scripts, dataset conversion utilities, and detailed examples, please visit the main GitHub repository:
+
+➡️ **[GitHub Repo: yolo11_doc_layout](https://github.com/Armaggheddon/yolo11_doc_layout)**
